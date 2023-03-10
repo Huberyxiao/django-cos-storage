@@ -19,8 +19,6 @@ class TencentCOSFile(File):
                 Bucket=self._storage.bucket,
                 Key=self.name,
             )
-            # >>> type(raw_stream)
-            # <class 'urllib3.response.HTTPResponse'>
             raw_stream = response["Body"].get_raw_stream()
             with BytesIO(raw_stream.data) as file_content:
                 copyfileobj(file_content, self._file)

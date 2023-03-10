@@ -1,4 +1,4 @@
-# Django TencentCOS Storage
+# Tencent Cloud Django COS Storage
 
 腾讯云对象存储（COS）服务 for Django。
 
@@ -52,7 +52,8 @@ TENCENTCOS_STORAGE = {
     "UPLOAD_PART_SIZE": 10,
     # 上传并发上传时最大线程数，选填，默认 5
     "UPLOAD_MAX_THREAD": 5,
-    # 腾讯云存储 Python SDK 的配置参数，详细说明请参考腾讯云官方文档
+    # 腾讯云存储 Python SDK 的配置参数，详细说明请参考腾讯云官方文档。
+    # 注意：CONFIG中字段的大小写请与python-sdk中CosConfig的构造参数保持一致
     "CONFIG": {
         "Region": "地域信息",
         "SecretId": "密钥 SecretId",
@@ -85,7 +86,8 @@ TENCENTCOS_STORAGE = {
 > 当文件的大小超过 `UPLOAD_PART_SIZE` 时将使用分块的方式并发上传文件，此配置项设置并发上传的最大线程数。如果文件大小不超过 `UPLOAD_PART_SIZE`，则不会使用分块的方式上传，此时该配置项不起任何作用。
 
 **CONFIG**
-> 腾讯云对象存储 Python SDK 的配置参数，其中 `Region`、`SecretId`、`SecretKey` 为必填参数。
+> 注意：CONFIG中字段的大小写请与python-sdk中CosConfig的构造参数保持一致
 > 
+> 腾讯云对象存储 Python SDK 的配置参数，其中 `Region`、`SecretId`、`SecretKey` 为必填参数。
 > 关于配置参数的详细说明请参考 [腾讯云对象存储 Python SDK 官方文档](https://cloud.tencent.com/document/product/436/12269)
 

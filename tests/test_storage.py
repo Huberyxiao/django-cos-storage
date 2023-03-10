@@ -1,6 +1,9 @@
 import io
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
+from requests.models import Response
+from urllib3.response import HTTPResponse
+from tempfile import SpooledTemporaryFile
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured, SuspiciousFileOperation
@@ -8,6 +11,7 @@ from django.core.files.base import File
 from django.core.files.storage import Storage
 from qcloud_cos.cos_client import CosConfig, CosS3Client
 from qcloud_cos.cos_exception import CosServiceError
+from qcloud_cos.streambody import StreamBody
 
 from django_cos_storage.storage import TencentCOSStorage
 
@@ -193,9 +197,21 @@ class TestTencentCOSStorage:
         with pytest.raises(NotImplementedError):
             storage.get_accessed_time("test-file")
 
-    def test__open(self, storage):
-        obj = storage._open("file")
-        assert isinstance(obj, File)
+    def test__open(self, monkeypatch, storage):
+        requests_response = Response()
+        requests_response.raw = HTTPResponse(
+            body=b"test file content",
+        )
+        requests_response.headers = {
+            "Content-Length": "17",
+        }
+        mm = MagicMock(return_value={"Body": StreamBody(requests_response)})
+        monkeypatch.setattr(CosS3Client, "get_object", mm)
+        get_file = storage._open("file2")
+        assert isinstance(get_file, SpooledTemporaryFile)
+        assert get_file.read() == b"test file content"
+        mm.assert_called_once()
+        # assert isinstance(obj, File)
 
     def test__save_with_default_upload_kwargs(self, monkeypatch, storage):
         content = File(io.BytesIO(b"bar"), "foo")

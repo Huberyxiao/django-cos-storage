@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-
+import configparser
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import Storage
@@ -10,6 +10,8 @@ from qcloud_cos.cos_exception import CosServiceError
 
 from .file import TencentCOSFile
 
+
+VERSION = "1.0.0"
 
 @deconstructible
 class TencentCOSStorage(Storage):
@@ -33,7 +35,8 @@ class TencentCOSStorage(Storage):
         self.upload_max_thread = setting.get("UPLOAD_MAX_THREAD", None)
 
         config_kwargs = config or setting.get("CONFIG", {})
-        config_kwargs["UA"] = "tencentcloud-django-plugin-cos"
+
+        config_kwargs["UA"] = "tencentcloud-django-cos-storage-" + "-" + VERSION
         required = ["Region", "SecretId", "SecretKey"]
         for key in required:
             if key not in config_kwargs:
@@ -115,7 +118,8 @@ class TencentCOSStorage(Storage):
         )
 
     def _open(self, name, mode="rb"):
-        return TencentCOSFile(self._full_path(name), self)
+        tencent_cos_file = TencentCOSFile(self._full_path(name), self)
+        return tencent_cos_file.file
 
     def _save(self, name, content):
         upload_kwargs = {}
